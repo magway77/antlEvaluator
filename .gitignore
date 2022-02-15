@@ -4,12 +4,33 @@
 # Log file
 *.log
 
-# BlueJ files
-*.ctxt
+.idea
+**/generated
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
 
+IntelliJ IDEA
+.gradle
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
 # Package Files #
 *.jar
 *.war
