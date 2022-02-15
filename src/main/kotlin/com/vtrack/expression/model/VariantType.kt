@@ -271,22 +271,13 @@ class StringType :
     override fun multiple(rightOperand: VariantType): VariantType {
         if (!isNull() && !rightOperand.isNull()) {
             return when (rightOperand.type) {
-                Type.INT, Type.REAL -> StringType().also {
-                    it.value = asString().repeat(rightOperand.asInt().toInt())
+                Type.INT, Type.BOOL -> IntType().also {
+                    it.value = asInt() * rightOperand.asInt()
                 }
-                Type.BOOL -> StringType().also {
-                    if (rightOperand.asBoolean()) {
-                        it.value = asString()
-                    }
+                Type.REAL -> IntType().also {
+                    it.value = asDouble() * rightOperand.asDouble()
                 }
-                Type.STRING -> StringType().also {
-                    if (rightOperand.asString().contains(asString())) {
-                        it.value = asString()
-                    } else if (asString().contains(rightOperand.asString())) {
-                        it.value = rightOperand.asString()
-                    }
-
-                }
+                else -> super.multiple(rightOperand)
             }
         }
         return StringType()

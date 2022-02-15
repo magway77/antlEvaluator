@@ -1,104 +1,74 @@
 import com.vtrack.expression.model.*
-import com.vtrack.generated.antlr.ExprLexer
-import com.vtrack.generated.antlr.ExprParser
-import expression.EvalVisitor
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KClass
+import kotlin.reflect.jvm.jvmName
 
 class EvalVisitorTest {
 
-    fun calculateStatement(statement: String): VariantType {
-        val lexer = ExprLexer(CharStreams.fromString(statement))
-        val tokens = CommonTokenStream(lexer)
-        val parser = ExprParser(tokens)
-        return EvalVisitor().visit(parser.statement())
+    fun assertValue(result: VariantType, kClass: KClass<out VariantType>, expected: Any? = null) {
+        assertEquals(result::class, kClass)
+        assertEquals(result.isNull(), expected == null)
+        assertEquals(expected, result.value)
+
     }
 
     @Test
     internal fun test_test_assignment() {
-        var result: VariantType = calculateStatement("b = true")
-        Assertions.assertNotNull(result.value)
-        Assertions.assertTrue(result is BoolType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertTrue(result.value as Boolean)
-
-        result = calculateStatement("b = 5")
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(5L, result.value)
-
-        result = calculateStatement("b = 3.2")
-        Assertions.assertTrue(result is RealType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(3.2, result.value)
-
-        result = calculateStatement("b = \"vasya\"")
-        Assertions.assertTrue(result is StringType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals("vasya", result.value)
+        val evaluator = ExpressionEvaluator()
+        assertValue(evaluator.evaluate("b = true"), BoolType::class, true)
+        assertValue(evaluator.evaluate("b = 5"), IntType::class, 5L)
+        assertValue(evaluator.evaluate("b = 3.2"), RealType::class, 3.2)
+        assertValue(evaluator.evaluate("b = 3.2"), RealType::class, 3.2)
+        assertValue(evaluator.evaluate("b = \"vasya\""), StringType::class, "vasya")
     }
 
     @Test
     internal fun test_test_addition() {
-        var result: VariantType = calculateStatement("3 + 2")
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(5L, result.value)
+        val evaluator = ExpressionEvaluator()
+        assertValue(evaluator.evaluate("3 + 2"), IntType::class, 5L)
+        assertValue(evaluator.evaluate("2 + 3"), IntType::class, 5L)
+        assertValue(evaluator.evaluate("3.7 + 2"), RealType::class, 5.7)
+        assertValue(evaluator.evaluate("2 + 3.7"), RealType::class, 5.7)
     }
 
     @Test
     internal fun test_test_subtraction() {
-        var result: VariantType = calculateStatement("3 - 2")
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(1L, result.value)
+        val evaluator = ExpressionEvaluator()
+        assertValue(evaluator.evaluate("3 - 2"), IntType::class, 1L)
     }
 
     @Test
     internal fun test_division() {
-        var result: VariantType = calculateStatement("9 / 2")
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(4L, result.value)
+        val evaluator = ExpressionEvaluator()
+        assertValue(evaluator.evaluate("9 / 2"), IntType::class, 4L)
+        assertValue(evaluator.evaluate("9 / 2.0"), RealType::class, 4.5)
+        assertValue(evaluator.evaluate("9.0 / 2"), RealType::class, 4.5)
+        assertValue(evaluator.evaluate("9.0 / 2.0"), RealType::class, 4.5)
     }
 
     @Test
     internal fun test_testParens() {
-        var result: VariantType = calculateStatement(" 2 + 3 * 2")
-        Assertions.assertNotNull(result.value)
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(8L, result.value)
-
-        result = calculateStatement(" (2 + 3) * 2")
-        Assertions.assertNotNull(result.value)
-        Assertions.assertTrue(result is IntType)
-        Assertions.assertFalse(result.isNull())
-        Assertions.assertEquals(10L, result.value)
+        val evaluator = ExpressionEvaluator()
+        assertValue(evaluator.evaluate(" 2 + 3 * 2"), IntType::class, 8L)
+        assertValue(evaluator.evaluate(" (2 + 3) * 2"), IntType::class, 10L)
 
     }
-
-    /*
-
 
     @Test
-    internal fun test_test_expr() {
-        var mapExpr = listOf<String>(
-            "a = 5",
-            "b = 6",
-            "(a+b)*2"
-        )
-        val expression = mapExpr.joinToString(separator = "\n")
-        val lexer = ExprLexer(CharStreams.fromString(expression))
-        val tokens = CommonTokenStream(lexer)
-        val parser = ExprParser(tokens)
-        val tree = parser.prog()
-        val visitor = EvalVisitor()
-        val visit = visitor.visit(tree)
-        Assertions.assertEquals(22, visit)
+    internal fun test_funCount() {
+        val evaluator =
+            ExpressionEvaluator().setVariable("e", listOf(1, 2, 3))
+        assertValue(evaluator.evaluate("e.count()"), IntType::class, 3)
     }
-*/
+
+    @Test
+    internal fun test_test_filterByType() {
+        val evaluator =
+            ExpressionEvaluator().setVariable("e", listOf(1, "a2", 3))
+        assertValue(evaluator.evaluate("e.filterByType(Int)"), IntType::class, 3)
+        Int
+    }
+
 
 }
