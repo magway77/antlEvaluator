@@ -74,6 +74,17 @@ abstract class VariantType(val type: Type) :
 
     fun asBoolean(default: Boolean = false) = asBooleanOrNull() ?: default
 
+    fun asListOrNull(): List<Any?>? {
+        return value?.let {
+            when (it) {
+                is List<*> -> it
+                else -> listOf(it)
+            }
+        }
+    }
+
+    fun asList(): List<Any?> = asListOrNull() ?: listOf()
+
     @Throws(UnsupportedOperationException::class)
     open fun plus(rightOperand: VariantType): VariantType =
         throw java.lang.UnsupportedOperationException("plus operation for type: ${this.type} and ${rightOperand.type}")

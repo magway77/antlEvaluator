@@ -1,8 +1,9 @@
-package com.vtrack.expression.model
+package com.vtrack.expression
 
 import com.vtrack.generated.antlr.ExprLexer
 import com.vtrack.generated.antlr.ExprParser
-import expression.EvalVisitor
+import com.vtrack.expression.model.ListType
+import com.vtrack.expression.model.VariantType
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 

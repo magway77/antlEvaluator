@@ -1,8 +1,8 @@
+import com.vtrack.expression.ExpressionEvaluator
 import com.vtrack.expression.model.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.jvmName
 
 class EvalVisitorTest {
 
@@ -66,8 +66,9 @@ class EvalVisitorTest {
     internal fun test_test_filterByType() {
         val evaluator =
             ExpressionEvaluator().setVariable("e", listOf(1, "a2", 3))
-        assertValue(evaluator.evaluate("e.filterByType(Int)"), IntType::class, 3)
-        Int
+        assertValue(evaluator.evaluate("e.filterByType(Int)"), ListType::class, listOf(1, 3))
+        assertValue(evaluator.evaluate("e.count()"), IntType::class, 3)
+        assertValue(evaluator.evaluate("e.filterByType(Int).count()"), IntType::class, 2)
     }
 
 

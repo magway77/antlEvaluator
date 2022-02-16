@@ -1,32 +1,8 @@
 /** Grammars always start with a grammar header. */
 grammar Expr;
 
-statement : expression (NEWLINE | EOF);
-
-
-expression :
-    LPAREN expression RPAREN                                    #Parens
-    | left=expression MULT right=expression                     #Multiply
-    | left=expression DIV right=expression                      #Division
-    | left=expression PLUS right=expression  #Addition
-    | left=expression MINUS right=expression  #Substruction
-    | primaryExpression                                         #ValueExpr
-    | assignmentExpression                                      #Assignment
-    | variable=expression'.count()'                                      #ListCount
-    | variable=expression'.filterByType('typeName=ID')'                  #ListFilterByType
-    ;
-
-primaryExpression : // variable or constant definition, such as
-    INT                 #IntValue
-    | DOUBLE            #DoubleValue
-    | STRING            #StringValue
-    | (TRUE | FALSE)    #BoolValue
-    ;
-
-
-assignmentExpression :
-    ID ASSIGN expression;
-
+LST_FUN_FILTER_BY_TYPE : 'filterByType';
+LST_FUN_COUNT : 'count';
 /*
 	Expression lexems https://github.com/antlr/antlr4/blob/master/doc/getting-started.md#installation
 */
@@ -36,9 +12,10 @@ INT			    : [0-9]+;
 DOUBLE			: [0-9]+'.'[0-9]+;
 TRUE			: 'true';
 FALSE			: 'false';
-ID			    : [a-zA-Z_][a-zA-Z_0-9]*;
+ID			    : [a-zA-Z_]([a-zA-Z_0-9])*;
 STRING			: '"' ~( '\r' | '\n' | '"' )* '"';
 WILDCARD		: '?';
+DOT             : '.';
 
 /*
     assignment
@@ -68,3 +45,36 @@ NEQUAL		: '!=';
 AND			: '&&';
 OR			: '||';
 NOT			: '!';
+
+tName:
+    ID (DOT ID)+;
+
+statement:
+ expression (NEWLINE| EOF)
+ ;
+
+expression :
+    variable=expression DOT LST_FUN_COUNT LPAREN RPAREN                                     #ListCount
+    | variable=expression DOT LST_FUN_FILTER_BY_TYPE LPAREN (typeName=expression) RPAREN    #ListFilterByType
+    | LPAREN expression RPAREN                                                      #Parens
+    | left=expression MULT right=expression                                         #Multiply
+    | left=expression DIV right=expression                                          #Division
+    | left=expression PLUS right=expression                                         #Addition
+    | left=expression MINUS right=expression                                        #Substruction
+    | primaryExpression                                                             #ValueExpr
+    | assignmentExpression                                                          #Assignment
+    ;
+
+primaryExpression : // variable or constant definition, such as
+    INT                 #IntValue
+    | DOUBLE            #DoubleValue
+    | STRING            #StringValue
+    | (TRUE | FALSE)    #BoolValue
+    | ID                #Id
+    | tName             #TypeNameLabel
+    ;
+
+
+assignmentExpression :
+    ID ASSIGN expression;
+

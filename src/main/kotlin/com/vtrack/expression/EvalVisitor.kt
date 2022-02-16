@@ -1,11 +1,12 @@
-package expression
+package com.vtrack.expression
 
 import com.vtrack.expression.model.*
 import com.vtrack.generated.antlr.ExprBaseVisitor
 import com.vtrack.generated.antlr.ExprParser
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.TerminalNode
-import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.KClass
+import kotlin.reflect.full.allSuperclasses
 
 class EvalVisitor :
     ExprBaseVisitor<VariantType>() {
@@ -17,7 +18,13 @@ class EvalVisitor :
     }
 
     override fun visitTerminal(node: TerminalNode?): VariantType {
-        throw java.lang.IllegalArgumentException("visit terminal antlr node")
+        return when (node?.symbol?.type) {
+            ExprParser.ID -> variables.getOrPut(node.text) { defaultResult() }
+            ExprParser.INT -> IntType().apply { value = node.text.toLongOrNull() }
+            ExprParser.DOUBLE -> RealType().apply { value = node.text.toDoubleOrNull() }
+            else -> throw java.lang.IllegalArgumentException("visit terminal antlr node")
+        }
+
     }
 
     override fun visitErrorNode(node: ErrorNode?): VariantType {
@@ -91,7 +98,14 @@ class EvalVisitor :
 
     override fun visitListCount(ctx: ExprParser.ListCountContext?): VariantType {
         return IntType().also { intType ->
-            val list = variables.getOrPut(ctx!!.variable.text) { ListType() }
+            val listExpression = visit(ctx!!.variable)
+            val list = ListType().also { listType ->
+                listType.value = when (listExpression.type) {
+                    VariantType.Type.STRING ->
+                        variables.getOrPut(listExpression.asString()) { ListType() }
+                    else -> listExpression.asList()
+                }
+            }
             if (!list.isNull()) {
                 intType.value = (list.value as? List<*>)?.size
             }
@@ -104,10 +118,17 @@ class EvalVisitor :
             list?.let {
                 if (list is List<*>) {
                     val typeName = ctx.typeName.text
-                    val kClass = Class.forName(typeName).kotlin
+                    //val kClass = Class.forName(typeName).kotlin
 
                     listType.value = list.filter { item ->
-                        item != null && kClass.isSubclassOf(item::class)
+                        if (item != null) {
+                            val itemClass: KClass<out Any> = item::class
+                            itemClass.simpleName.equals(typeName)
+                                    || itemClass.allSuperclasses.map(KClass<*>::simpleName)
+                                .contains(typeName)
+                        } else {
+                            false
+                        }
                     }
                 }
             }

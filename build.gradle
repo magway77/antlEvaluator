@@ -37,6 +37,8 @@ clean {
     delete("com/vtrack/generated")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }
