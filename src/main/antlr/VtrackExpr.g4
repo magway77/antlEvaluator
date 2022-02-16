@@ -23,6 +23,7 @@ R_SQUARE_BRACKET    : ']';
 COMMA               : ',';
 PER                 : '/';
 UDERSCORE           : '_';
+MASK_ANY            : '*';
 
 
 /*rules*/
@@ -40,6 +41,24 @@ timePeriod:
 valueRange:
     leftBorderKind=(L_PARENTHESIS | L_SQUARE_BRACKET) lowValue=INT COMMA? highValue=INT? rightBorderKind=(R_PARENTHESIS | R_SQUARE_BRACKET);
 
+qualifierRangeItem:
+    (MASK_ANY | INT) COMMA?;
+
+qualifierRangeItems:
+    qualifierRangeItem+;
+
+qualifierRange:
+    L_SQUARE_BRACKET qualifierRangeValue=qualifierRangeItems R_SQUARE_BRACKET;
+
 expression:
-    identificator COLON identificator COLON identificator valueRange COLON valueRange timePeriod
+    alertName=identificator COLON
+    sourceId=identificator COLON
+    qualifierName=identificator
+    qualifierValue=qualifierRange COLON
+    thresholdRange=valueRange
+    timeRange=timePeriod
+;
+
+statement:
+    expression (NEWLINE | EOF)
 ;

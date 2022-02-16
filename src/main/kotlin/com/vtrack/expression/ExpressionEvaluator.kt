@@ -1,25 +1,28 @@
 package com.vtrack.expression
 
-import com.vtrack.generated.antlr.ExprLexer
-import com.vtrack.generated.antlr.ExprParser
-import com.vtrack.expression.model.ListType
-import com.vtrack.expression.model.VariantType
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.tree.ParseTreeVisitor
 
-class ExpressionEvaluator {
+interface ExpressionEvaluator<T> {
 
-    val visitor = EvalVisitor()
+    fun evaluate(statement: String): T
 
-    fun evaluate(statement: String): VariantType {
-        val lexer = ExprLexer(CharStreams.fromString(statement))
-        val tokens = CommonTokenStream(lexer)
-        val parser = ExprParser(tokens)
-        return visitor.visit(parser.statement())
-    }
+    fun setVariable(variable: String, value: T): ExpressionEvaluator<T>
+}
 
-    fun setVariable(variable: String, value: List<Any>): ExpressionEvaluator {
-        visitor.variables[variable] = ListType().also { it.value = value }
+
+interface ExprVisitorBase<T> : ParseTreeVisitor<T>{
+    val variables: HashMap<String, T>
+}
+
+
+abstract class ExpressionEvaluatorBase<T>(
+    protected val visitor: ExprVisitorBase<T>
+) : ExpressionEvaluator<T> {
+
+    override fun setVariable(variable: String, value: T): ExpressionEvaluator<T> {
+        visitor.variables[variable] = value
         return this
     }
+
 }

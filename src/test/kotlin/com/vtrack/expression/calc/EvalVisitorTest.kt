@@ -1,5 +1,6 @@
-import com.vtrack.expression.ExpressionEvaluator
-import com.vtrack.expression.model.*
+package com.vtrack.expression.calc
+
+import com.vtrack.expression.calc.model.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
@@ -15,7 +16,7 @@ class EvalVisitorTest {
 
     @Test
     internal fun test_test_assignment() {
-        val evaluator = ExpressionEvaluator()
+        val evaluator = CalcExpressionEvaluator()
         assertValue(evaluator.evaluate("b = true"), BoolType::class, true)
         assertValue(evaluator.evaluate("b = 5"), IntType::class, 5L)
         assertValue(evaluator.evaluate("b = 3.2"), RealType::class, 3.2)
@@ -25,7 +26,7 @@ class EvalVisitorTest {
 
     @Test
     internal fun test_test_addition() {
-        val evaluator = ExpressionEvaluator()
+        val evaluator = CalcExpressionEvaluator()
         assertValue(evaluator.evaluate("3 + 2"), IntType::class, 5L)
         assertValue(evaluator.evaluate("2 + 3"), IntType::class, 5L)
         assertValue(evaluator.evaluate("3.7 + 2"), RealType::class, 5.7)
@@ -34,13 +35,13 @@ class EvalVisitorTest {
 
     @Test
     internal fun test_test_subtraction() {
-        val evaluator = ExpressionEvaluator()
+        val evaluator = CalcExpressionEvaluator()
         assertValue(evaluator.evaluate("3 - 2"), IntType::class, 1L)
     }
 
     @Test
     internal fun test_division() {
-        val evaluator = ExpressionEvaluator()
+        val evaluator = CalcExpressionEvaluator()
         assertValue(evaluator.evaluate("9 / 2"), IntType::class, 4L)
         assertValue(evaluator.evaluate("9 / 2.0"), RealType::class, 4.5)
         assertValue(evaluator.evaluate("9.0 / 2"), RealType::class, 4.5)
@@ -49,7 +50,7 @@ class EvalVisitorTest {
 
     @Test
     internal fun test_testParens() {
-        val evaluator = ExpressionEvaluator()
+        val evaluator = CalcExpressionEvaluator()
         assertValue(evaluator.evaluate(" 2 + 3 * 2"), IntType::class, 8L)
         assertValue(evaluator.evaluate(" (2 + 3) * 2"), IntType::class, 10L)
 
@@ -58,14 +59,14 @@ class EvalVisitorTest {
     @Test
     internal fun test_funCount() {
         val evaluator =
-            ExpressionEvaluator().setVariable("e", listOf(1, 2, 3))
+            CalcExpressionEvaluator().setVariable("e", listOf(1, 2, 3))
         assertValue(evaluator.evaluate("e.count()"), IntType::class, 3)
     }
 
     @Test
     internal fun test_test_filterByType() {
         val evaluator =
-            ExpressionEvaluator().setVariable("e", listOf(1, "a2", 3))
+            CalcExpressionEvaluator().setVariable("e", listOf(1, "a2", 3))
         assertValue(evaluator.evaluate("e.filterByType(Int)"), ListType::class, listOf(1, 3))
         assertValue(evaluator.evaluate("e.count()"), IntType::class, 3)
         assertValue(evaluator.evaluate("e.filterByType(Int).count() >=3"), IntType::class, 2)

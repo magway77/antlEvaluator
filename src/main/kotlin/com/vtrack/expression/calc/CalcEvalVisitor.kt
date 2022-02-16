@@ -1,6 +1,6 @@
-package com.vtrack.expression
+package com.vtrack.expression.calc
 
-import com.vtrack.expression.model.*
+import com.vtrack.expression.calc.model.*
 import com.vtrack.generated.antlr.ExprBaseVisitor
 import com.vtrack.generated.antlr.ExprParser
 import org.antlr.v4.runtime.tree.ErrorNode
@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode
 import kotlin.reflect.KClass
 import kotlin.reflect.full.allSuperclasses
 
-class EvalVisitor :
+class CalcEvalVisitor :
     ExprBaseVisitor<VariantType>() {
 
     var variables: HashMap<String, VariantType> = HashMap()

@@ -1,4 +1,4 @@
-package com.vtrack.expression.model
+package com.vtrack.expression.calc.model
 
 abstract class VariantType(val type: Type) :
     Comparable<VariantType> {
