@@ -68,7 +68,7 @@ class EvalVisitorTest {
             ExpressionEvaluator().setVariable("e", listOf(1, "a2", 3))
         assertValue(evaluator.evaluate("e.filterByType(Int)"), ListType::class, listOf(1, 3))
         assertValue(evaluator.evaluate("e.count()"), IntType::class, 3)
-        assertValue(evaluator.evaluate("e.filterByType(Int).count()"), IntType::class, 2)
+        assertValue(evaluator.evaluate("e.filterByType(Int).count() >=3"), IntType::class, 2)
     }
 
 
